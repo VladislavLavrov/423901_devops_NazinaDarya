@@ -1,0 +1,71 @@
+﻿@model calculator.Models.CalculatorModel
+
+@{
+    ViewData["Title"] = "Калькулятор";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title text-center mb-0">Калькулятор</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Calculate" method="post">
+                        <!-- Первое число -->
+                        <div class="mb-3">
+                            <label class="form-label">Первое число</label>
+                            <input name="FirstNumber" class="form-control" type="number" step="any" value="@Model.FirstNumber" />
+                        </div>
+
+                        <!-- Операции -->
+                        <div class="mb-3">
+                            <label class="form-label">Операция</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="Operation" value="+" id="add" @(Model.Operation == "+" ? "checked" : "")>
+                                <label class="btn btn-outline-primary" for="add">+</label>
+
+                                <input type="radio" class="btn-check" name="Operation" value="-" id="subtract" @(Model.Operation == "-" ? "checked" : "")>
+                                <label class="btn btn-outline-primary" for="subtract">-</label>
+
+                                <input type="radio" class="btn-check" name="Operation" value="*" id="multiply" @(Model.Operation == "*" ? "checked" : "")>
+                                <label class="btn btn-outline-primary" for="multiply">×</label>
+
+                                <input type="radio" class="btn-check" name="Operation" value="/" id="divide" @(Model.Operation == "/" ? "checked" : "")>
+                                <label class="btn btn-outline-primary" for="divide">÷</label>
+                            </div>
+                        </div>
+
+                        <!-- Второе число -->
+                        <div class="mb-3">
+                            <label class="form-label">Второе число</label>
+                            <input name="SecondNumber" class="form-control" type="number" step="any" value="@Model.SecondNumber" />
+                        </div>
+
+                        <!-- Кнопка вычисления -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-success w-100 py-2">
+                                Вычислить
+                            </button>
+                        </div>
+
+                        <!-- Результат -->
+                        <div class="mb-3">
+                            <label class="form-label">Результат</label>
+                            <input value="@Model.Result" class="form-control result-display" readonly />
+                        </div>
+
+                        <!-- Сообщение об ошибке -->
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert alert-danger mt-3" role="alert">
+                                @Model.ErrorMessage
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
