@@ -10,17 +10,17 @@ namespace calculator.Models
         public int Id { get; set; }
 
         [Required]
-        public decimal FirstNumber { get; set; }
+        public double FirstNumber { get; set; }  // ← ИЗМЕНИТЕ НА double
 
         [Required]
-        public decimal SecondNumber { get; set; }
+        public double SecondNumber { get; set; }  // ← ИЗМЕНИТЕ НА double
 
         [Required]
         [StringLength(10)]
         public string Operation { get; set; } = string.Empty;
 
         [Required]
-        public decimal Result { get; set; }
+        public double Result { get; set; }  // ← ИЗМЕНИТЕ НА double
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -1,20 +1,35 @@
 using calculator.Models;
+using calculator.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace calculator.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
         {
-            return View(new CalculatorModel());
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var model = new CalculatorModel();
+            // Загружаем историю вычислений
+            model.History = await _context.CalculationHistory
+                .OrderByDescending(h => h.CreatedAt)
+                .Take(10)
+                .ToListAsync();
+
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult Calculate(CalculatorModel model)
+        public async Task<IActionResult> Calculate(CalculatorModel model)
         {
-            // Убираем проверку ModelState.IsValid
             try
             {
                 model.Result = model.Operation switch
@@ -33,7 +48,19 @@ namespace calculator.Controllers
                 }
                 else
                 {
-                    model.ErrorMessage = ""; // Очищаем сообщение об ошибке
+                    model.ErrorMessage = "";
+
+                    // Сохраняем в базу данных
+                    var history = new CalculationHistory
+                    {
+                        FirstNumber = model.FirstNumber,
+                        SecondNumber = model.SecondNumber,
+                        Operation = model.Operation,
+                        Result = model.Result
+                    };
+
+                    _context.CalculationHistory.Add(history);
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -41,6 +68,12 @@ namespace calculator.Controllers
                 model.Result = 0;
                 model.ErrorMessage = "Произошла ошибка при вычислении: " + ex.Message;
             }
+
+            // Обновляем историю
+            model.History = await _context.CalculationHistory
+                .OrderByDescending(h => h.CreatedAt)
+                .Take(10)
+                .ToListAsync();
 
             return View("Index", model);
         }
