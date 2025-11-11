@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using calculator.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace calculator.Models
 {
@@ -9,5 +10,8 @@ namespace calculator.Models
         public double Result { get; set; }
         public string Operation { get; set; } = "+";
         public string ErrorMessage { get; set; }
+
+        // Новое свойство для отображения истории вычислений
+        public List<CalculationHistory> History { get; set; } = new List<CalculationHistory>();
     }
 }
