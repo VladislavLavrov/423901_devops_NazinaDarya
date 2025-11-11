@@ -32,6 +32,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// ƒадим MariaDB врем€ запуститьс€ перед миграци€ми
+await Task.Delay(15000); // 15 секунд задержки
+
 // јвтоматическое применение миграций при запуске
 using (var scope = app.Services.CreateScope())
 {
@@ -39,6 +42,7 @@ using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
+        Console.WriteLine("Database migrations applied successfully.");
     }
     catch (Exception ex)
     {
