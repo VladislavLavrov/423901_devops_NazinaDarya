@@ -17,4 +17,4 @@ services:
     hostname: app
     build: 8_Calculator/
     ports:
-      - "0.0.0.0:5008:5008"
+      - "0.0.0.0:5008:80"
