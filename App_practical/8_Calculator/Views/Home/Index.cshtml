@@ -1,4 +1,4 @@
-﻿@model List<Calculator.Data.DataInputVariant>
+﻿@model List<calculator.Data.DataInputVariant>
 
 @{
     ViewData["Title"] = "Калькулятор";
@@ -13,7 +13,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Форма должна отправлять данные в метод Calculate контроллера -->
-                    <form asp-action="Calculate" method="post">
+                    <form asp-action="calculate" method="post">
                         @Html.AntiForgeryToken()
 
                         <!-- Первое число -->
