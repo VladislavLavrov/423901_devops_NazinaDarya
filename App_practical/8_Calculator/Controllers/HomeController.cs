@@ -24,7 +24,8 @@ namespace calculator.Controllers
         public IActionResult Index()
         {
             var data = _context.DataInputVariants.OrderByDescending(x => x.ID_DataInputVariant).ToList();
-            return View(data);
+
+            return View("~/Views/Home/Index.cshtml", data);
         }
 
         /// <summary>
