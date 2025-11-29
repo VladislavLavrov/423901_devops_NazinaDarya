@@ -1,4 +1,4 @@
-﻿@model calculator.Models.CalculatorModel
+﻿@model List<Calculator.Data.DataInputVariant>
 
 @{
     ViewData["Title"] = "Калькулятор";
@@ -12,27 +12,30 @@
                     <h3 class="card-title text-center mb-0">Калькулятор</h3>
                 </div>
                 <div class="card-body">
+                    <!-- Форма должна отправлять данные в метод Calculate контроллера -->
                     <form asp-action="Calculate" method="post">
+                        @Html.AntiForgeryToken()
+
                         <!-- Первое число -->
                         <div class="mb-3">
                             <label class="form-label">Первое число</label>
-                            <input name="FirstNumber" class="form-control" type="number" step="any" value="@Model.FirstNumber" />
+                            <input name="num1" class="form-control" type="number" step="any" required />
                         </div>
 
                         <!-- Операции -->
                         <div class="mb-3">
                             <label class="form-label">Операция</label>
                             <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="Operation" value="+" id="add" @(Model.Operation == "+" ? "checked" : "")>
+                                <input type="radio" class="btn-check" name="operation" value="1" id="add">
                                 <label class="btn btn-outline-primary" for="add">+</label>
 
-                                <input type="radio" class="btn-check" name="Operation" value="-" id="subtract" @(Model.Operation == "-" ? "checked" : "")>
+                                <input type="radio" class="btn-check" name="operation" value="2" id="subtract">
                                 <label class="btn btn-outline-primary" for="subtract">-</label>
 
-                                <input type="radio" class="btn-check" name="Operation" value="*" id="multiply" @(Model.Operation == "*" ? "checked" : "")>
+                                <input type="radio" class="btn-check" name="operation" value="3" id="multiply">
                                 <label class="btn btn-outline-primary" for="multiply">×</label>
 
-                                <input type="radio" class="btn-check" name="Operation" value="/" id="divide" @(Model.Operation == "/" ? "checked" : "")>
+                                <input type="radio" class="btn-check" name="operation" value="4" id="divide">
                                 <label class="btn btn-outline-primary" for="divide">÷</label>
                             </div>
                         </div>
@@ -40,32 +43,69 @@
                         <!-- Второе число -->
                         <div class="mb-3">
                             <label class="form-label">Второе число</label>
-                            <input name="SecondNumber" class="form-control" type="number" step="any" value="@Model.SecondNumber" />
+                            <input name="num2" class="form-control" type="number" step="any" required />
                         </div>
 
                         <!-- Кнопка вычисления -->
                         <div class="mb-3">
                             <button type="submit" class="btn btn-success w-100 py-2">
-                                Вычислить
+                                Вычислить (через Kafka)
                             </button>
                         </div>
-
-                        <!-- Результат -->
-                        <div class="mb-3">
-                            <label class="form-label">Результат</label>
-                            <input value="@Model.Result" class="form-control result-display" readonly />
-                        </div>
-
-                        <!-- Сообщение об ошибке -->
-                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                        {
-                            <div class="alert alert-danger mt-3" role="alert">
-                                @Model.ErrorMessage
-                            </div>
-                        }
                     </form>
                 </div>
             </div>
+
+            <!-- История вычислений -->
+            @if (Model.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0">История вычислений</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Операция</th>
+                                        <th>Число 1</th>
+                                        <th>Число 2</th>
+                                        <th>Результат</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @item.Type_operation switch
+                                                {
+                                                Operation.Add => "+",
+                                                Operation.Subtract => "-",
+                                                Operation.Multiply => "×",
+                                                Operation.Divide => "÷",
+                                                _ => "?"
+                                                }
+                                            </td>
+                                            <td>@item.Operand_1</td>
+                                            <td>@item.Operand_2</td>
+                                            <td>@item.Result</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+<!-- Футер с ФИО и группой -->
+<footer class="mt-5 py-3 bg-light">
+    <div class="container text-center">
+        <small class="text-muted">Назина Дарья Сергеевна, гр. НМТ-423901</small>
+    </div>
+</footer>
