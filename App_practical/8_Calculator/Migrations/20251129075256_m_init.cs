@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace _8_Calculator.Migrations
 {
     /// <inheritdoc />
-    public partial class m_in1 : Migration
+    public partial class m_init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,21 +15,20 @@ namespace _8_Calculator.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "CalculationHistory",
+                name: "DataInputVariants",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    ID_DataInputVariant = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FirstNumber = table.Column<double>(type: "double", nullable: false),
-                    SecondNumber = table.Column<double>(type: "double", nullable: false),
-                    Operation = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Result = table.Column<double>(type: "double", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Operand_1 = table.Column<double>(type: "double", nullable: false),
+                    Operand_2 = table.Column<double>(type: "double", nullable: false),
+                    Type_operation = table.Column<int>(type: "int", nullable: false),
+                    Result = table.Column<string>(type: "varchar(128)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CalculationHistory", x => x.Id);
+                    table.PrimaryKey("PK_DataInputVariants", x => x.ID_DataInputVariant);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -39,7 +37,7 @@ namespace _8_Calculator.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CalculationHistory");
+                name: "DataInputVariants");
         }
     }
 }

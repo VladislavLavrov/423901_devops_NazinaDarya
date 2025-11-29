@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore.Design;
 using calculator.Data;
 
-public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<CalculatorContext>
 {
-    public ApplicationDbContext CreateDbContext(string[] args)
+    public CalculatorContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<CalculatorContext>();
 
         // Используйте тот же ConnectionString что и в appsettings.json
         optionsBuilder.UseMySql(
@@ -14,6 +14,6 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
             ServerVersion.AutoDetect("Server=93.88.178.186;Port=5058;Database=8_WebCalculatorDb;Uid=root;Pwd=password;")
         );
 
-        return new ApplicationDbContext(optionsBuilder.Options);
+        return new CalculatorContext(optionsBuilder.Options);
     }
 }
