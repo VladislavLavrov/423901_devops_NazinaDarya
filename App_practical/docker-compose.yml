@@ -16,5 +16,7 @@ services:
     container_name: web-app-calculator-8
     hostname: app
     build: 8_Calculator/
+    deepends_on:
+      - mariadb
     ports:
       - "0.0.0.0:5008:5008"
