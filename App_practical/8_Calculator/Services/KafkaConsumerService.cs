@@ -38,7 +38,7 @@ namespace calculator.Services
             var consumerConfig = new ConsumerConfig();
             config.GetSection("Kafka:ConsumerSettings").
             Bind(consumerConfig);
-            _topic = config.GetValue<string>("Kafka:Topic-Name");
+            _topic = config.GetValue<string>("Kafka:TopicName");
             _kafkaConsumer = new ConsumerBuilder<Null, string>(consumerConfig).Build();
             _serviceProvider = serviceProvider;
             _clientFactory = clientFactory;
