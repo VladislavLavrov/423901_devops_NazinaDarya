@@ -1,92 +1,79 @@
-using calculator.Models;
 using calculator.Data;
+using calculator.Models;
+using calculator.Services;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
+using System.Text.Json;
 
 namespace calculator.Controllers
 {
-    public class HomeController : Controller
+    public class CalculatorController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CalculatorContext _context;
+        private readonly KafkaProducerService<Null, string> _producer;
 
-        public HomeController(ApplicationDbContext context)
+        public CalculatorController(CalculatorContext context, KafkaProducerService<Null, string> producer)
         {
             _context = context;
+            _producer = producer;
         }
 
-        public async Task<IActionResult> Index()
+        /// <summary>
+        /// Отображение страницы Index.
+        /// </summary>
+        public IActionResult Index()
         {
-            var model = new CalculatorModel();
-            // Загружаем историю вычислений
-            model.History = await _context.CalculationHistory
-                .OrderByDescending(h => h.CreatedAt)
-                .Take(10)
-                .ToListAsync();
+            var data = _context.DataInputVariants.OrderByDescending(x => x.ID_DataInputVariant).ToList();
+            return View(data);
+        }
 
-            return View(model);
+        /// <summary>
+        /// Обработка запроса на вычисление.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Calculate(double num1, double num2, Operation operation)
+        {
+            // Подготовка объекта для расчета
+            var dataInputVariant = new DataInputVariant
+            {
+                Operand_1 = num1,
+                Operand_2 = num2,
+                Type_operation = operation,
+            };
+
+            // Отправка данных в Kafka
+            await SendDataToKafka(dataInputVariant);
+
+            // Перенаправление на страницу Index
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Calculate(CalculatorModel model)
+        public IActionResult Callback([FromBody] DataInputVariant inputData)
         {
-            try
-            {
-                model.Result = model.Operation switch
-                {
-                    "+" => model.FirstNumber + model.SecondNumber,
-                    "-" => model.FirstNumber - model.SecondNumber,
-                    "*" => model.FirstNumber * model.SecondNumber,
-                    "/" => model.SecondNumber != 0 ? model.FirstNumber / model.SecondNumber : 0,
-                    _ => 0
-                };
-
-                if (model.Operation == "/" && model.SecondNumber == 0)
-                {
-                    model.ErrorMessage = "Деление на ноль невозможно!";
-                    model.Result = 0;
-                }
-                else
-                {
-                    model.ErrorMessage = "";
-
-                    // Сохраняем в базу данных
-                    var history = new CalculationHistory
-                    {
-                        FirstNumber = model.FirstNumber,
-                        SecondNumber = model.SecondNumber,
-                        Operation = model.Operation,
-                        Result = model.Result
-                    };
-
-                    _context.CalculationHistory.Add(history);
-                    await _context.SaveChangesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                model.Result = 0;
-                model.ErrorMessage = "Произошла ошибка при вычислении: " + ex.Message;
-            }
-
-            // Обновляем историю
-            model.History = await _context.CalculationHistory
-                .OrderByDescending(h => h.CreatedAt)
-                .Take(10)
-                .ToListAsync();
-
-            return View("Index", model);
+            // Сохранение данных и результата в базе данных
+            SaveDataAndResult(inputData);
+            return Ok();
         }
 
-        public IActionResult Privacy()
+        /// <summary>
+        /// Сохранение данных и результата в базе данных.
+        /// </summary>
+        private DataInputVariant SaveDataAndResult(DataInputVariant inputData)
         {
-            return View();
+            _context.DataInputVariants.Add(inputData);
+            _context.SaveChanges();
+            return inputData;
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        /// <summary>
+        /// Отправка данных в Kafka.
+        /// </summary>
+        private async Task SendDataToKafka(DataInputVariant dataInputVariant)
         {
-            return View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var json = JsonSerializer.Serialize(dataInputVariant);
+            await _producer.ProduceAsync("nazina", new Message<Null, string> { Value = json });
         }
     }
 }

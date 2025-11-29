@@ -1,25 +1,32 @@
-using calculator.Data;
-using calculator.Models;
 using Microsoft.EntityFrameworkCore;
+using Confluent.Kafka;
+using calculator.Data;
+using calculator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Добавьте DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-    ));
+string mariadbCS = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<CalculatorContext>(options =>
+{
+    options.UseMySql(mariadbCS, new MySqlServerVersion(new Version(10, 5, 15)));
+});
+
+builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<KafkaConsumerService>();
+builder.Services.AddSingleton<KafkaProducerHandler>();
+builder.Services.AddSingleton<KafkaProducerService<Null, string>>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Calculator/Error");
     app.UseHsts();
 }
 
@@ -30,26 +37,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-// Дадим MariaDB время запуститься перед миграциями
-await Task.Delay(15000); // 15 секунд задержки
-
-// Автоматическое применение миграций при запуске
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
-        Console.WriteLine("Database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        // Логируем ошибку, но не останавливаем приложение
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database.");
-    }
-}
+    pattern: "{controller=Calculator}/{action=Index}/{id?}");
 
 app.Run();
