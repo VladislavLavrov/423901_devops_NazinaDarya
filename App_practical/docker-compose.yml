@@ -1,18 +1,53 @@
 services:
-    prometheus:
-        image: prom/prometheus:latest
-        container_name: prometheus-8
-        user: root
-        volumes:
-            - ./prometheus/config/:/etc/prometheus/
-            - ./prometheus/data:/prometheus:rw
-        command:
-            - '--config.file=/etc/prometheus/prometheus.yml'
-            - '--storage.tsdb.path=/prometheus'
-        ports:
-            - 9108:9090
-        networks:
-            - metrics-net
+  calculator:
+    build: App_practical/8_Calculator/
+    ports:
+      - "5108:5008"
+    environment:
+      ASPNETCORE_URLS: "http://+:5008"
+    networks:
+      - metrics-net-8
+
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: root
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9208:9090"
+    networks:
+      - metrics-net-8
+
+  renderer:
+    image: grafana/grafana-image-renderer:latest
+    ports:
+      - "5058:8081"
+    networks:
+      - metrics-net-8
+
+  grafana:
+    image: grafana/grafana:latest
+    user: root
+    depends_on:
+      - prometheus
+      - renderer
+    ports:
+      - "3008:3000"
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    environment:
+      GF_RENDERING_SERVER_URL: http://renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+      GF_LOG_FILTERS: rendering:debug
+    networks:
+      - metrics-net-8
+
 networks:
-    metrics-net:
-        name: metrics-net-8
+  metrics-net-8:
+    name: metrics-net-8
