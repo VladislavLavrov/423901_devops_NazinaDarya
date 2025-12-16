@@ -1,14 +1,12 @@
 services:
   calculator:
-    build: App_practical/8_Calculator/
+    build: .
     ports:
       - "5108:5008"
     environment:
       ASPNETCORE_URLS: "http://+:5008"
     networks:
       - metrics-net-8
-
-
 
   prometheus:
     image: prom/prometheus:latest
