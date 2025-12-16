@@ -12,7 +12,7 @@ services:
     image: prom/prometheus:latest
     user: root
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./8_Calculator/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
