@@ -1,6 +1,7 @@
 services:
     prometheus:
         image: prom/prometheus:latest
+        container_name: prometheus-8
         user: root
         volumes:
             - ./prometheus/config/:/etc/prometheus/
