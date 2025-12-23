@@ -1,0 +1,53 @@
+name: CI/CD Pipeline for eLIBRARY Parser
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: List output files
+      run: dir bin\Release\net8.0\ /s
+      shell: cmd
+      
+  docker-build:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker image
+      run: docker build -t elibrary-parser .
+      
+    - name: Test Docker image
+      run: |
+        docker run -d -p 8080:80 --name test-container elibrary-parser
+        sleep 10
+        docker ps
+        docker stop test-container
+        docker rm test-container

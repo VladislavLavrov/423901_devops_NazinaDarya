@@ -1,0 +1,103 @@
+﻿@{
+    ViewData["Title"] = "Парсер eLIBRARY.RU";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">🎓 Простой парсер eLIBRARY.RU</h3>
+                    <p class="mb-0 small">Находит только название и авторов</p>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("Parse")" class="mb-4">
+                        <div class="mb-3">
+                            <label for="url" class="form-label">Ссылка на статью eLIBRARY.RU:</label>
+                            <input type="url"
+                                   class="form-control form-control-lg"
+                                   id="url"
+                                   name="url"
+                                   placeholder="https://elibrary.ru/item.asp?id=..."
+                                   required>
+                            <div class="form-text">Вставьте ссылку на статью с сайта eLIBRARY.RU</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                🔍 Найти название и авторов
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (ViewBag.Result != null)
+                    {
+                        var result = ViewBag.Result as ElibraryParserWeb.Models.Publication;
+
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">✅ Результат парсинга</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6>🔗 Исходная ссылка:</h6>
+                                    <a href="@ViewBag.OriginalUrl" target="_blank" class="text-break">
+                                        @ViewBag.OriginalUrl
+                                    </a>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6>📝 Название статьи:</h6>
+                                    <div class="alert alert-light border">
+                                        <strong>@result.Title</strong>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6>👥 Авторы:</h6>
+                                    <div class="alert alert-light border">
+                                        @result.Authors
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                                        🔄 Новый поиск
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mt-4 text-center text-muted">
+                        <small>Просто вставьте ссылку → Нажмите кнопку → Получите результат!</small>
+                    </div>
+                </div>
+
+                <div class="card-footer text-center">
+                    <small class="text-muted">Парсер eLIBRARY.RU | Только название и авторы</small>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>📌 Примеры ссылок для теста:</h6>
+                    <ul class="list-unstyled">
+                        <li>• https://elibrary.ru/item.asp?id=12345678</li>
+                        <li>• https://elibrary.ru/item.asp?id=87654321</li>
+                        <li>• https://elibrary.ru/item.asp?id=55555555</li>
+                    </ul>
+                    <small class="text-muted">Используйте реальные ID статей с eLIBRARY.RU</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
